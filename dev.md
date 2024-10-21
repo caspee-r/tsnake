@@ -1,7 +1,6 @@
-# features
-- [] tui and gui version.
-- [] including 5 levels.
-- [] a way to set the initial speed.
+## features
+- [] including 3 levels.
+- [] a way to set the initial speed. deel with speed issue
 - [] 2 modes free mode and competitive mode.
 - [] remember the high score.
-- [] smooth snake movement in the gui version
+- [] food disappear because the snake body clears it [FIXIT]
