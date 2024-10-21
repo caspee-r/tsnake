@@ -10,22 +10,23 @@
 #define MAX_NODES 500
 #define SPEED 1
 #define FOOD 'O'
-#define SNAKE "\u25A0" 
-enum Direction{ 
-	UP,
-	DOWN,
-	RIGHT,
-	LEFT,
-};
+//#define SNAKE "\u25A0"
+#define SNAKE "E"
 
 #define clear() printf("\033c");
 #define hide_cursor() printf("\33[?25l")
 #define show_cursor() printf("\33[?25h")
 #define MOVE_TO(y,x) printf("\033[%d;%dH",y,x)
 
+enum Direction{
+	UP,
+	DOWN,
+	RIGHT,
+	LEFT,
+};
+
 struct winsize ws;
 struct termios o_term;
-
 
 struct Vec2 {
 	unsigned int x;
@@ -86,7 +87,6 @@ void render_arena(size_t width,size_t height){
 	}
 }
 
-
 void move_snake(){
 	struct Vec2 clear_node = snake.nodes[snake.count-1];
 	draw_char(clear_node.y,clear_node.x,' '); //clear a character
@@ -101,21 +101,21 @@ void move_snake(){
 			snake.nodes[0].x++;
 			break;
 		case LEFT:
-			snake.nodes[0].x--; 
+			snake.nodes[0].x--;
 			break;
 		case DOWN:
 			snake.nodes[0].y++;
 			break;
-	}	
+	}
 	draw_text(snake.nodes[0].y,snake.nodes[0].x,SNAKE);
 }
 void init_snake(unsigned count,enum Direction dir){
 	snake.dir = dir;
 	snake.count = count;
-	int j = 20;
+	int j = 4;
 	for (unsigned i = 0; i < count; i++){
 		snake.nodes[i].y = j++;
-		snake.nodes[i].x = 30;
+		snake.nodes[i].x = 10;
 	}
 
 	for (unsigned i = 0 ; i < snake.count;++i){
@@ -130,16 +130,20 @@ void add_node(){
 	snake.count++;
 }
 
+int randint(int start,int end){
+	int x = start + (int)((double)rand() / (RAND_MAX) * (end - start + 1));
+	return x;
+}
 
 void gen_food(unsigned width,unsigned height){
-	/* 
+	/*
 	the food vector position must be in:
 	width > x > 0
 	height > y > 0
 		*/
 	srand(time(NULL));
-	food.x = (rand() % (width - 2)) + 2 ;
-	food.y = (rand() % (height - 2)) + 2 ;
+	food.x = randint(2,width-2);
+	food.y = randint(2,height-2) ;
 	draw_char(food.y,food.x,FOOD);
 }
 
@@ -148,6 +152,9 @@ int is_dead(unsigned width,unsigned height){
 		|| snake.nodes[0].x >= width){
 		return 1;
 	}
+//	for(unsigned i = 1;i < snake.count;++i){
+//		if(snake.nodes[0].x == snake.nodes[i].x && snake.nodes[0].y == snake.nodes[i].y) return 1;
+//	}
 	return 0;
 }
 
@@ -156,10 +163,9 @@ int is_eaten(){
 	return 0;
 }
 
-
-
 int main(void){
 	term_init();
+	clear();
 	int height = ws.ws_row ;
 	int width = ws.ws_col ;
 	render_arena(width,height);
@@ -178,20 +184,20 @@ int main(void){
 	char c;
 	hide_cursor();
 	while(!is_dead(width,height)){
-		usleep(30000);
+		usleep(50000);
 		ssize_t ret = read(STDIN_FILENO, &c, 1);
 		if (ret == -1) { // there is no input
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {
-				move_snake();	
+				move_snake();
 				if (is_eaten()){
 					add_node();
-					draw_char(food.y,food.y,' ');
+					//draw_char(food.y,food.x,' ');
 					gen_food(width,height);
 				}
 			}else {
 				perror("read");
 				exit(EXIT_FAILURE);
-			}		
+			}
 		} else if (ret) {
 			switch (c) {
 				case 'w':
@@ -210,7 +216,7 @@ int main(void){
 			move_snake();
 			if (is_eaten()){
 				add_node();
-				draw_char(food.y,food.y,' ');
+				//draw_char(food.y,food.x,' ');
 				gen_food(width,height);
 			}
 		}
