@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #define MAX_NODES 500
+#define SPAWN_SIZE 5
 #define SPEED 1
 #define FOOD 'O'
 //#define SNAKE "\u25A0"
@@ -131,6 +132,7 @@ void add_node(){
 }
 
 int randint(int start,int end){
+	srand(time(NULL));
 	int x = start + (int)((double)rand() / (RAND_MAX) * (end - start + 1));
 	return x;
 }
@@ -141,7 +143,6 @@ void gen_food(unsigned width,unsigned height){
 	width > x > 0
 	height > y > 0
 		*/
-	srand(time(NULL));
 	food.x = randint(2,width-2);
 	food.y = randint(2,height-2) ;
 	draw_char(food.y,food.x,FOOD);
@@ -152,9 +153,6 @@ int is_dead(unsigned width,unsigned height){
 		|| snake.nodes[0].x >= width){
 		return 1;
 	}
-//	for(unsigned i = 1;i < snake.count;++i){
-//		if(snake.nodes[0].x == snake.nodes[i].x && snake.nodes[0].y == snake.nodes[i].y) return 1;
-//	}
 	return 0;
 }
 
@@ -169,7 +167,8 @@ int main(void){
 	int height = ws.ws_row ;
 	int width = ws.ws_col ;
 	render_arena(width,height);
-	init_snake(3,UP);
+	int dir = randint(0,4);
+	init_snake(SPAWN_SIZE,dir);
 	gen_food(width,height);
 
 	int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
